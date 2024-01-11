@@ -1,6 +1,6 @@
 {
   "name": "@triptech/cloudflare-worker-rollbar",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Allow Cloudflare Workers to log to Rollbar",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

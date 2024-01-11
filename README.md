@@ -1,4 +1,4 @@
-# Cloudflare Workers Rollbar
+# Cloudflare Worker Rollbar
 
 Allow Cloudflare Workers to log to Rollbar
 
