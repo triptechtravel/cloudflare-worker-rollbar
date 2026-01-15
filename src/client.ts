@@ -14,7 +14,7 @@ import type {
 
 const ROLLBAR_API_URL = 'https://api.rollbar.com/api/1/item/'
 const NOTIFIER_NAME = '@triptech/cloudflare-worker-rollbar'
-const NOTIFIER_VERSION = '2.0.0'
+const NOTIFIER_VERSION = '2.0.1'
 
 /** Headers that should always be scrubbed from request context */
 const DEFAULT_SCRUB_HEADERS = [
@@ -39,11 +39,20 @@ const DEFAULT_SCRUB_FIELDS = [
 
 /**
  * Scrub sensitive values from an object
+ * Uses a WeakSet to track visited objects and prevent infinite recursion
+ * from circular references (common in DOM elements, React state, etc.)
  */
 function scrubObject<T extends Record<string, unknown>>(
   obj: T,
-  scrubFields: string[]
+  scrubFields: string[],
+  visited: WeakSet<object> = new WeakSet()
 ): T {
+  // Check for circular reference
+  if (visited.has(obj)) {
+    return '[Circular Reference]' as unknown as T
+  }
+  visited.add(obj)
+
   const result: Record<string, unknown> = { ...obj }
   const lowerFields = scrubFields.map((f) => f.toLowerCase())
 
@@ -51,10 +60,16 @@ function scrubObject<T extends Record<string, unknown>>(
     if (lowerFields.includes(key.toLowerCase())) {
       result[key] = '[SCRUBBED]'
     } else if (typeof result[key] === 'object' && result[key] !== null) {
-      result[key] = scrubObject(
-        result[key] as Record<string, unknown>,
-        scrubFields
-      )
+      // Check for circular reference before recursing
+      if (visited.has(result[key] as object)) {
+        result[key] = '[Circular Reference]'
+      } else {
+        result[key] = scrubObject(
+          result[key] as Record<string, unknown>,
+          scrubFields,
+          visited
+        )
+      }
     }
   }
 
@@ -297,10 +312,14 @@ export class Rollbar {
     context?: ReportContext
   ): Promise<RollbarResponse | null> {
     const payload = this.buildPayload(level, context)
+    // Scrub custom data to handle circular references and sensitive fields
+    const scrubbedCustom = context?.custom
+      ? scrubObject(context.custom, this.scrubFields)
+      : {}
     payload.data.body = {
       message: {
         body: message,
-        ...(context?.custom ?? {}),
+        ...scrubbedCustom,
       },
     }
 

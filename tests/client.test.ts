@@ -247,6 +247,53 @@ describe('Rollbar Client', () => {
       expect(payload.data.custom?.['customSecret']).toBe('[SCRUBBED]')
       expect(payload.data.custom?.['normalField']).toBe('value')
     })
+
+    it('should handle circular references without stack overflow', async () => {
+      const rollbar = new Rollbar({ accessToken: 'test-token' })
+
+      // Create an object with a circular reference
+      const circularObj: Record<string, unknown> = {
+        name: 'test',
+        value: 123,
+      }
+      circularObj.self = circularObj // Circular reference
+
+      await rollbar.info('Test', {
+        custom: circularObj,
+      })
+
+      // Should not throw and should complete successfully
+      expect(mockFetch).toHaveBeenCalledTimes(1)
+
+      const payload = JSON.parse(
+        mockFetch.mock.calls[0]?.[1]?.body as string
+      ) as RollbarPayload
+      expect(payload.data.custom?.['name']).toBe('test')
+      expect(payload.data.custom?.['self']).toBe('[Circular Reference]')
+    })
+
+    it('should handle deeply nested circular references', async () => {
+      const rollbar = new Rollbar({ accessToken: 'test-token' })
+
+      // Create a more complex circular structure
+      const parent: Record<string, unknown> = { name: 'parent' }
+      const child: Record<string, unknown> = { name: 'child', parent }
+      parent.child = child
+
+      await rollbar.info('Test', {
+        custom: parent,
+      })
+
+      expect(mockFetch).toHaveBeenCalledTimes(1)
+
+      const payload = JSON.parse(
+        mockFetch.mock.calls[0]?.[1]?.body as string
+      ) as RollbarPayload
+      expect(payload.data.custom?.['name']).toBe('parent')
+      // The child's parent reference should be detected as circular
+      const childData = payload.data.custom?.['child'] as Record<string, unknown>
+      expect(childData?.['parent']).toBe('[Circular Reference]')
+    })
   })
 
   describe('request context', () => {
@@ -351,7 +398,7 @@ describe('Rollbar Client', () => {
         mockFetch.mock.calls[0]?.[1]?.body as string
       ) as RollbarPayload
       expect(payload.data.notifier?.name).toBe('@triptech/cloudflare-worker-rollbar')
-      expect(payload.data.notifier?.version).toBe('2.0.0')
+      expect(payload.data.notifier?.version).toBe('2.0.1')
       expect(payload.data.platform).toBe('cloudflare-workers')
       expect(payload.data.language).toBe('javascript')
     })
