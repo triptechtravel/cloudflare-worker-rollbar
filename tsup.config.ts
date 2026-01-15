@@ -1,10 +1,18 @@
-import { defineConfig } from "tsup";
+import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ["src/index.ts"],
-  format: ["cjs", "esm"], // Build for commonJS and ESmodules
-  dts: true, // Generate declaration file (.d.ts)
+  entry: ['src/index.ts'],
+  format: ['cjs', 'esm'],
+  dts: true,
   splitting: false,
   sourcemap: true,
   clean: true,
-});
+  treeshake: true,
+  minify: false,
+  target: 'es2022',
+  outDir: 'dist',
+  // Ensure we don't bundle any dependencies
+  external: [],
+  // Generate .d.ts and .d.cts files
+  tsconfig: 'tsconfig.json',
+})

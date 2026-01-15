@@ -1,0 +1,16 @@
+# Example Wrangler configuration for using @triptech/cloudflare-worker-rollbar
+
+name = "my-worker"
+main = "index.ts"
+compatibility_date = "2024-01-01"
+
+# Environment variables (non-secret)
+[vars]
+ENVIRONMENT = "development"
+
+# For production, add the Rollbar token as a secret:
+# npx wrangler secret put ROLLBAR_TOKEN
+
+# You can also set environment-specific variables:
+# [env.production.vars]
+# ENVIRONMENT = "production"

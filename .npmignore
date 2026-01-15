@@ -1,0 +1,22 @@
+# Source files (use dist/)
+src/
+tests/
+example/
+
+# Config files
+tsconfig.json
+tsup.config.ts
+vitest.config.ts
+eslint.config.js
+.github/
+
+# Development files
+.gitignore
+.npmignore
+coverage/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
