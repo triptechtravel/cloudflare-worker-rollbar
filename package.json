@@ -2,7 +2,10 @@
   "name": "@triptech/cloudflare-worker-rollbar",
   "version": "2.0.1",
   "description": "A lightweight, TypeScript-first Rollbar client for Cloudflare Workers",
-  "author": "Isaac Rowntree",
+  "author": {
+    "name": "Isaac Rowntree",
+    "url": "https://github.com/isaacrowntree"
+  },
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.cjs",

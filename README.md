@@ -293,7 +293,11 @@ await rollbar.info('message', { custom: { extra: 'data' } })
 
 ## License
 
-MIT © [TripTech Travel](https://github.com/triptechtravel)
+MIT © [Isaac Rowntree](https://github.com/isaacrowntree)
+
+## Author
+
+Created and maintained by [Isaac Rowntree](https://github.com/isaacrowntree).
 
 ## Credits
 
