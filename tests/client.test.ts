@@ -256,7 +256,7 @@ describe('Rollbar Client', () => {
         name: 'test',
         value: 123,
       }
-      circularObj.self = circularObj // Circular reference
+      circularObj['self'] = circularObj // Circular reference
 
       await rollbar.info('Test', {
         custom: circularObj,
@@ -278,7 +278,7 @@ describe('Rollbar Client', () => {
       // Create a more complex circular structure
       const parent: Record<string, unknown> = { name: 'parent' }
       const child: Record<string, unknown> = { name: 'child', parent }
-      parent.child = child
+      parent['child'] = child
 
       await rollbar.info('Test', {
         custom: parent,
